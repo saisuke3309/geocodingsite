@@ -9,10 +9,8 @@ export interface NisyotenItem {
   shisetsuAddress2: string,
   ninsyoDate: string,
   city: string,
-  location: {
-    lat: number,
-    lng: number,  
-  }
+  locationlat: number,
+  locationlng: number,  
 }
 
 export function mapArrayToNisyotenItem(data: string[][]): NisyotenItem[] {
@@ -30,10 +28,8 @@ export function mapArrayToNisyotenItem(data: string[][]): NisyotenItem[] {
       shisetsuAddress2: data[i][6].replaceAll('"',""),
       ninsyoDate: data[i][7].replaceAll('"',""),
       city: data[i][8].replaceAll('"',""),
-      location: {
-        lat: 0,
-        lng: 0,
-      }
+      locationlat: 0,
+      locationlng: 0,
     }
     retList.push(value);
   }

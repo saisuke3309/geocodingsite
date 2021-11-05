@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { CSVLink, CSVDownload } from "react-csv";
 import { GoogleMap,  LoadScript, Marker } from "@react-google-maps/api";
 import { readFileAsText, mapCSVToArray } from './helpers';
 import { mapArrayToNisyotenItem, NisyotenItem } from "../types/NisyotenItem";
@@ -67,6 +68,8 @@ const initLocationProps : LocationProps = {
   isShowMarker: false
 }
 
+const _sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 /**
  * APIキー
  */
@@ -81,6 +84,8 @@ const GeocodingMap = () => {
   const [csvFile, setCsvFile] = useState<Blob>(new Blob());
   const [ninsyotenListState, setNinsyotenListState] = useState<NisyotenItem[]>([]);
   const [isShwowPins, setIsShowPins] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const [nowCount, setNowCount] = useState(0);
  
   const createOffsetSize = () => {
     return setSize(new window.google.maps.Size(0, -45));
@@ -162,11 +167,16 @@ const GeocodingMap = () => {
    * 住所情報リストをジオコーディングし、緯度経度に変換する
    */
   const geocodingAddressList = async() => {
-    for (var i = 0; i < ninsyotenList.length; i++) {
+    setTotalCount(ninsyotenList.length);
+    for (var i = 0; i < ninsyotenList.length; i++) {      
+      setNowCount(i+1);
       var loc = await geocoding(ninsyotenList[i].shisetsuAddress1);
       if (loc) {
-        ninsyotenList[i].location = loc.location;
+        ninsyotenList[i].locationlat = loc.location.lat;
+        ninsyotenList[i].locationlng = loc.location.lng;
       }
+
+      await _sleep(1000);
     }
     setNinsyotenListState(ninsyotenList);
   }
@@ -203,14 +213,14 @@ const GeocodingMap = () => {
     <div style={{ width: "100vw", height: "100vh" }}>
       <div>
         <p>CSVファイルを選択してください。</p>
-        <input
-          type="file"
-          accept="text/csv"
-          onChange={getFile}
-        />
+        <input type="file" accept="text/csv" onChange={getFile} />
+        <button onClick={() => mappingFromCsv()}>CSVを読み込んでマッピング</button>
+        <span>{nowCount}/{totalCount}</span>
       </div>
-      <button onClick={() => mappingFromCsv()}>CSVを読み込んでマッピング</button>
-      <button onClick={() => geocodingTest()}>Geocodingを試す</button>
+      <div>
+        <CSVLink data={ninsyotenListState}>ダウンロード</CSVLink>
+      </div>
+      {/* <button onClick={() => geocodingTest()}>Geocodingを試す</button> */}
       <LoadScript googleMapsApiKey={API_KEY} onLoad={() => createOffsetSize()}>
         <GoogleMap
           mapContainerStyle={containerStyle}
@@ -219,7 +229,11 @@ const GeocodingMap = () => {
           options={mapProps.options}>
           {locProps.isShowMarker && <Marker position={locProps.location}/>}
           {isShwowPins &&  ninsyotenListState.map((ninsyoten, index) => (
-            <Marker key={index} label={ninsyoten.shisetsuName} position={ninsyoten.location}/>
+            <Marker
+              key={index}
+              label={ninsyoten.shisetsuName}
+              position={new google.maps.LatLng(ninsyoten.locationlat, ninsyoten.locationlng)}
+            />
           ))}
         </GoogleMap>
       </LoadScript>
