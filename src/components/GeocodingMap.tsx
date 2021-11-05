@@ -1,9 +1,7 @@
-import React, { ChangeEventHandler, useEffect, useState } from "react";
-import { GoogleMap, InfoWindow, LoadScript, Marker } from "@react-google-maps/api";
+import React, { useState } from "react";
+import { GoogleMap,  LoadScript, Marker } from "@react-google-maps/api";
 import { readFileAsText, mapCSVToArray } from './helpers';
 import { mapArrayToNisyotenItem, NisyotenItem } from "../types/NisyotenItem";
-import { resolve } from "dns";
-import { rejects } from "assert";
 
 /**
  * Mapに使用するプロパティ
@@ -164,32 +162,13 @@ const GeocodingMap = () => {
    * 住所情報リストをジオコーディングし、緯度経度に変換する
    */
   const geocodingAddressList = async() => {
-    var returnList = new Array<NisyotenItem>();
     for (var i = 0; i < ninsyotenList.length; i++) {
-      var ret : NisyotenItem = {
-        gyosyuInsyoku: ninsyotenList[i].gyosyuInsyoku,
-        gyosyuSyukuhaku: ninsyotenList[i].gyosyuSyukuhaku,
-        shisetsuName: ninsyotenList[i].shisetsuName,
-        shisetsuNameKana: ninsyotenList[i].shisetsuNameKana,
-        shisetsuPostCode: ninsyotenList[i].shisetsuPostCode,
-        shisetsuAddress1: ninsyotenList[i].shisetsuAddress1,
-        shisetsuAddress2: ninsyotenList[i].shisetsuAddress2,
-        ninsyoDate: ninsyotenList[i].ninsyoDate,
-        city: ninsyotenList[i].city,
-        location: {
-          lat: 0,
-          lng: 0,  
-        }
-      }
       var loc = await geocoding(ninsyotenList[i].shisetsuAddress1);
       if (loc) {
-        ret.location = loc.location;
+        ninsyotenList[i].location = loc.location;
       }
-      returnList.push(ret);
     }
-    ninsyotenList = returnList;
     setNinsyotenListState(ninsyotenList);
-    //alert("Done");
   }
 
   /**
