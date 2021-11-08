@@ -17,7 +17,7 @@ export function mapArrayToNisyotenItem(data: string[][]): NisyotenItem[] {
 
   var retList = Array<NisyotenItem>();
   // 先頭と末尾は除外
-  for (var i = 1; i < data.length - 1; i++) {
+  for (var i = 0; i < data.length - 1; i++) {
     var value : NisyotenItem = {
       gyosyuInsyoku: data[i][0].replaceAll('"',""),
       gyosyuSyukuhaku: data[i][1].replaceAll('"',""),

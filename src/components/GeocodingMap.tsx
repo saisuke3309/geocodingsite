@@ -116,11 +116,9 @@ const GeocodingMap = () => {
    */
   const readCSV = async () => {
     try {
-      if (ninsyotenList.length === 0) {
-        const csv = await readFileAsText(csvFile);
-        const arr = mapCSVToArray(csv);
-        ninsyotenList = mapArrayToNisyotenItem(arr);
-      }
+      const csv = await readFileAsText(csvFile);
+      const arr = mapCSVToArray(csv);
+      ninsyotenList = mapArrayToNisyotenItem(arr);
     } catch (error) {
       alert(error);
     }
