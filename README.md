@@ -1,46 +1,46 @@
-# Getting Started with Create React App
+# Google Map Geocoding APIを使った住所・座標変換サイト for 山形県新型コロナウィルス対策認証店
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+このプロジェクトは、山形県新型コロナウィルス対策認証店のサイト（ <https://yamagata-ninsho.jp/> ）からダウンロードできる認証店一覧データに対し、座標（緯度、経度）を付与するものです。
 
-## Available Scripts
+CSVファイル（list.cscv）をサイトに読み込ませて実行することにより、住所の情報を座標に変換します。
 
-In the project directory, you can run:
+## プロジェクトの実行方法
 
-### `npm start`
+このプロジェクトは、ローカル環境で実行されることを想定しています。ファイルをクローンし、実行してください。
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### 使用フレームワーク
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+React/Typescriptを利用しています。
 
-### `npm test`
+### 使用ライブラリ
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+@types/react
 
-### `npm run build`
+@types/react-dom
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+@react-google-maps/api
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+react-csv
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Google MAP APIの利用について
 
-### `npm run eject`
+ジオコーディング用に「Geocoding API」、結果表示用に「Maps Javascript API」を利用しています。実行の際には各自APIを用意してください。
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+APIキーは環境変数（.env）に格納しています。以下のように指定してください。
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+`REACT_APP_GOOGLE_API_KEY="APIキー"`
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## サイト仕様
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+1.サイトを起動し、ファイル選択ダイアログからlist.csvを開きます。
+2.「CSVを読み込んでマッピング」ボタンから処理を起動します。ジオコーディングが終わると結果が下部のマップに表示されます。
+3.マップにマーカーが表示された状態から「ダウンロード」リンクを押すと、CSVファイルの各行末尾に座標が付与されたファイルがダウンロードできます。
 
-## Learn More
+### 注意事項
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+* ファイル処理（エンコードや改行コード補正）については現状動くだけの状態になっており、出力結果を活用する場合はテキストエディタでの補正が必要です。
+* Geocoding APIへのリクエストが多数になるとうまく動かないようです。100件程度であれば動きます。また、実行の際には1秒間のスリープを入れています。
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### 当プロジェクトについて
+
+当プロジェクトは斎藤雄輔が個人的に開発しているものになります。斎藤雄輔が所属する企業や団体とは関係がありませんし、GitHubへの記述やコメント等については、個人の見解となります。
