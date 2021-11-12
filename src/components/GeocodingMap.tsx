@@ -62,6 +62,10 @@ const initialMap: MapProps = {
   //     ],
   //   }]
   // },
+  options: {
+    draggable: true,
+    zoomControl: true,
+  },
 };
 
 const initLocation : CustomMarkerOptions = {
@@ -148,6 +152,10 @@ const GeocodingMap = () => {
             lng: markerOption.location.lng,
           },
           zoom: 18,
+          options: {
+            draggable: true,
+            zoomControl: true,
+          },        
         }
         setMapProps(mapSettings);
       }
