@@ -3,6 +3,10 @@ import { CSVLink, CSVDownload } from "react-csv";
 import { GoogleMap,  LoadScript, Marker } from "@react-google-maps/api";
 import { readFileAsText, mapCSVToArray } from './helpers';
 import { mapArrayToNisyotenItem, NisyotenItem } from "../types/NisyotenItem";
+import CustomMarkerOptions from "../types/CustomMarkerOptions";
+import CustomMarker from "./CustomMarker";
+import CustomInfoWindowOptions from "../types/CustomInfoWindowOptions";
+import CustomInfoWindow from "./CustomInfoWindow";
 
 /**
  * Mapに使用するプロパティ
@@ -13,7 +17,7 @@ import { mapArrayToNisyotenItem, NisyotenItem } from "../types/NisyotenItem";
     lng: number;
   };
   zoom: number;
-  options: google.maps.MapOptions;
+  options?: google.maps.MapOptions;
 }
 
 class LocationProps {
@@ -22,6 +26,7 @@ class LocationProps {
     lat: number;
     lng: number;
   };
+  label?: string;
   isShowMarker: boolean;
 
   constructor(){
@@ -42,30 +47,47 @@ class LocationProps {
   width: "100%",
 }
 
-const initialMapProps: MapProps = {
+const initialMap: MapProps = {
   center: {
     lat: 38.240567493884434,
     lng: 140.36396563273115,
   },
   zoom: 12,
+  // options: {
+  //   styles: [{
+  //     featureType: "all",
+  //     elementType: "labels",
+  //     stylers: [
+  //       { "visibility": "off" }
+  //     ],
+  //   }]
+  // },
   options: {
-    styles: [{
-      featureType: "all",
-      elementType: "labels",
-      stylers: [
-        { "visibility": "off" }
-      ],
-    }]
+    draggable: true,
+    zoomControl: true,
   },
 };
 
-const initLocationProps : LocationProps = {
-  address: "山形市松波4-5-12",
+const initLocation : CustomMarkerOptions = {
+  label :{
+    text: "",
+  },
+  address: "",
   location : {
     lat: 0,
     lng: 0,
   },
-  isShowMarker: false
+  isShowMarker: false,
+}
+
+const initWindowOptions: CustomInfoWindowOptions = {
+  objectName : "",
+  location : {
+    lat: 0,
+    lng: 0,
+  },
+  locationLabel: "",
+  isShowWindow: false,
 }
 
 const _sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -78,35 +100,64 @@ const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY || '';
 var ninsyotenList = new Array<NisyotenItem>();
 
 const GeocodingMap = () => {
-  const [mapProps, setMapProps] = useState<MapProps>(initialMapProps);
-  const [locProps, setLocProps] = useState<LocationProps>(initLocationProps);
+  const [mapProps, setMapProps] = useState<MapProps>(initialMap);
+  const [locProps, setLocProps] = useState<CustomMarkerOptions>(initLocation);
+  const [windowProps, setWindowProps] = useState<CustomInfoWindowOptions>(initWindowOptions);
   const [size, setSize] = useState<undefined | google.maps.Size>(undefined);
   const [csvFile, setCsvFile] = useState<Blob>(new Blob());
   const [ninsyotenListState, setNinsyotenListState] = useState<NisyotenItem[]>([]);
   const [isShwowPins, setIsShowPins] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [nowCount, setNowCount] = useState(0);
+  const [geocodeTarget, setGeocodeTarget] = useState("");
  
   const createOffsetSize = () => {
     return setSize(new window.google.maps.Size(0, -45));
   }
 
   /**
-   * 初期値に設定した住所でジオコーディングを試す
+   * テキストボックスに入力した住所でジオコーディング
    */
   const geocodingTest = () => {
+    setMapProps(initialMap);
+    setLocProps(initLocation);
+    setWindowProps(initWindowOptions);
     const geocoder = new window.google.maps.Geocoder();
-    geocoder.geocode({address: initLocationProps.address}, (results, status) => {
+    geocoder.geocode({address: geocodeTarget}, (results, status) => {
       if (status === 'OK' && results != null) {
-        var locationProps : LocationProps = {
-          address: initLocationProps.address,
+        var markerOption : CustomMarkerOptions = {
+          address: geocodeTarget,
           location: {
             lat: results[0].geometry.location.lat(),
             lng: results[0].geometry.location.lng()
           },
-          isShowMarker: true
+          isShowMarker: true,
         }
-        setLocProps(locationProps);
+        setLocProps(markerOption);
+
+        var windowOption: CustomInfoWindowOptions = {
+          objectName: geocodeTarget,
+          location: {
+            lat: results[0].geometry.location.lat(),
+            lng: results[0].geometry.location.lng()
+          },
+          locationLabel: results[0].geometry.location.lat() + "," + results[0].geometry.location.lng(),
+          isShowWindow: true,
+        }
+        setWindowProps(windowOption);
+
+        var mapSettings : MapProps = {
+          center: {
+            lat: markerOption.location.lat,
+            lng: markerOption.location.lng,
+          },
+          zoom: 18,
+          options: {
+            draggable: true,
+            zoomControl: true,
+          },        
+        }
+        setMapProps(mapSettings);
       }
     });
   }
@@ -218,14 +269,19 @@ const GeocodingMap = () => {
       <div>
         <CSVLink data={ninsyotenListState}>ダウンロード</CSVLink>
       </div>
-      {/* <button onClick={() => geocodingTest()}>Geocodingを試す</button> */}
+      <br/>
+      <div>
+        <input type="text" onChange={e => setGeocodeTarget(e.target.value)}/>
+        <button onClick={() => geocodingTest()}>Geocodingを試す</button>
+      </div>
       <LoadScript googleMapsApiKey={API_KEY} onLoad={() => createOffsetSize()}>
         <GoogleMap
           mapContainerStyle={containerStyle}
           center={mapProps.center}
           zoom={mapProps.zoom}
           options={mapProps.options}>
-          {locProps.isShowMarker && <Marker position={locProps.location}/>}
+          {locProps.isShowMarker && <CustomMarker options={locProps} />}
+          {windowProps.isShowWindow && <CustomInfoWindow options={windowProps}/>}
           {isShwowPins &&  ninsyotenListState.map((ninsyoten, index) => (
             <Marker
               key={index}
