@@ -115,6 +115,9 @@ const GeocodingMap = () => {
    * テキストボックスに入力した住所でジオコーディング
    */
   const geocodingTest = () => {
+    setMapProps(initialMap);
+    setLocProps(initLocation);
+    setWindowProps(initWindowOptions);
     const geocoder = new window.google.maps.Geocoder();
     geocoder.geocode({address: geocodeTarget}, (results, status) => {
       if (status === 'OK' && results != null) {
@@ -123,9 +126,6 @@ const GeocodingMap = () => {
           location: {
             lat: results[0].geometry.location.lat(),
             lng: results[0].geometry.location.lng()
-          },
-          label: {
-            text: '',
           },
           isShowMarker: true,
         }

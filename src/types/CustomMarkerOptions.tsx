@@ -1,6 +1,6 @@
 export type CustomMarkerOptions = {
   address?: string;
-  label: google.maps.MarkerLabel;
+  label?: google.maps.MarkerLabel;
   location: {
     lat: number;
     lng: number;
