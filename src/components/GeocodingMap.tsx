@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { CSVLink, CSVDownload } from "react-csv";
-import { GoogleMap,  LoadScript, Marker } from "@react-google-maps/api";
+import React, { useEffect, useState } from "react";
+import { CSVLink } from "react-csv";
+import { GoogleMap,  InfoWindow,  LoadScript, Marker } from "@react-google-maps/api";
 import { readFileAsText, mapCSVToArray } from './helpers';
 import { mapArrayToNisyotenItem, NisyotenItem } from "../types/NisyotenItem";
 import CustomMarkerOptions from "../types/CustomMarkerOptions";
@@ -110,6 +110,8 @@ const GeocodingMap = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [nowCount, setNowCount] = useState(0);
   const [geocodeTarget, setGeocodeTarget] = useState("");
+  const [selected, SetSelected] = useState(false);
+  const [selectInfoWindosProps, setSelectInfoWindowProps] = useState<CustomInfoWindowOptions>(initWindowOptions);
  
   const createOffsetSize = () => {
     return setSize(new window.google.maps.Size(0, -45));
@@ -254,8 +256,25 @@ const GeocodingMap = () => {
     if (file === null) {
       return;
     }
-    let imgTag = document.getElementById("")
+    // let imgTag = document.getElementById("")
     setCsvFile(file);
+  }
+
+  /**
+   * pinの位置が変更されたとき
+   */
+  const pinChange = (index: number, e: google.maps.MapMouseEvent) => {
+    var list = ninsyotenList;
+    var latlng = e.latLng;
+
+    if (latlng != null) {
+      list[index].locationlat = e.latLng?.lat() ?? 0;
+      list[index].locationlng = e.latLng?.lng() ?? 0;  
+    }
+    
+    setNinsyotenListState(list);
+    setIsShowPins(false);
+    setIsShowPins(true);
   }
 
   return (
@@ -287,8 +306,47 @@ const GeocodingMap = () => {
               key={index}
               label={ninsyoten.shisetsuName}
               position={new google.maps.LatLng(ninsyoten.locationlat, ninsyoten.locationlng)}
+              clickable={true}
+              draggable={true}    
+              onClick={() => {
+                setSelectInfoWindowProps({
+                  isShowWindow: true,
+                  location: {
+                    lat: ninsyoten.locationlat,
+                    lng: ninsyoten.locationlng,
+                  },
+                  objectName: ninsyoten.shisetsuName,
+                })
+              }}
+              onDragEnd={(e) => {
+                pinChange(index, e);
+              }}
             />
           ))}
+          {selectInfoWindosProps.isShowWindow ? (
+            <InfoWindow
+              position={{
+                lat: selectInfoWindosProps.location.lat,
+                lng: selectInfoWindosProps.location.lng,
+              }}
+              onCloseClick={() => {
+                setSelectInfoWindowProps({
+                  isShowWindow: false,
+                  location: {
+                    lat: 0,
+                    lng: 0,
+                  },
+                  objectName: '',
+                })
+              }}
+            >
+              <div>
+                  <h3>{selectInfoWindosProps.objectName}</h3>
+                  POS: {selectInfoWindosProps.location.lat} , {selectInfoWindosProps.location.lng}
+              </div>
+            </InfoWindow>
+          ): null}
+
         </GoogleMap>
       </LoadScript>
     </div>

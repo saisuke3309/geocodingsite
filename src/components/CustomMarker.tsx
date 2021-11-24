@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { GoogleMap, InfoWindow, LoadScript, Marker } from "@react-google-maps/api";
+import { Marker } from "@react-google-maps/api";
 import { CustomMarkerOptions } from "../types/CustomMarkerOptions";
 
 
