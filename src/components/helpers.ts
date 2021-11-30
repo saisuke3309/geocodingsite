@@ -8,7 +8,7 @@ function readFileAsText(file: Blob): Promise<string> {
 }
 
 function mapCSVToArray(csv: string): string[][] {
-  return csv.split('\n').map((row) => row.split(','));
+  return csv.split('\r\n').map((row) => row.split(','));
 }
 
 export { readFileAsText, mapCSVToArray };
